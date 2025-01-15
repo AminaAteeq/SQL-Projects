@@ -1,3 +1,88 @@
-1. Total Sales Revenue:
+---------1. Total Sales Revenue:
 SELECT SUM(total_amount) AS total_sales
 FROM Sales;
+
+---------2. Sales by Product:
+sql
+Copy code
+SELECT P.product_name, SUM(S.quantity_sold) AS total_quantity, SUM(S.total_amount) AS total_sales
+FROM Sales S
+JOIN Products P ON S.product_id = P.product_id
+GROUP BY P.product_name
+ORDER BY total_sales DESC;
+
+--------3. Sales by Region:
+sql
+Copy code
+SELECT R.region_name, SUM(S.total_amount) AS region_sales
+FROM Sales S
+JOIN Customers C ON S.customer_id = C.customer_id
+JOIN Regions R ON C.country = R.country
+GROUP BY R.region_name
+ORDER BY region_sales DESC;
+
+--------4. Top 5 Customers by Total Spending:
+sql
+Copy code
+SELECT C.first_name, C.last_name, SUM(S.total_amount) AS total_spent
+FROM Sales S
+JOIN Customers C ON S.customer_id = C.customer_id
+GROUP BY C.customer_id
+ORDER BY total_spent DESC
+LIMIT 5;
+
+--------5. Product Availability and Sales Performance:
+sql
+Copy code
+SELECT P.product_name, P.stock_quantity, SUM(S.quantity_sold) AS total_sales
+FROM Products P
+LEFT JOIN Sales S ON P.product_id = S.product_id
+GROUP BY P.product_name
+HAVING P.stock_quantity < SUM(S.quantity_sold)
+ORDER BY total_sales DESC;
+
+-------6. Customer Purchase Behavior by Age Group:
+sql
+Copy code
+SELECT 
+  CASE 
+    WHEN age BETWEEN 18 AND 24 THEN '18-24'
+    WHEN age BETWEEN 25 AND 34 THEN '25-34'
+    WHEN age BETWEEN 35 AND 44 THEN '35-44'
+    WHEN age BETWEEN 45 AND 54 THEN '45-54'
+    ELSE '55+' 
+  END AS age_group,
+  COUNT(DISTINCT S.customer_id) AS total_customers,
+  SUM(S.total_amount) AS total_spent
+FROM Sales S
+JOIN Customers C ON S.customer_id = C.customer_id
+GROUP BY age_group
+ORDER BY total_spent DESC;
+
+-------7. Monthly Sales Analysis:
+sql
+Copy code
+SELECT 
+  EXTRACT(MONTH FROM sale_date) AS month,
+  EXTRACT(YEAR FROM sale_date) AS year,
+  SUM(total_amount) AS total_sales
+FROM Sales
+GROUP BY year, month
+ORDER BY year, month;
+
+-----8. Product Category Sales Summary:
+sql
+Copy code
+SELECT P.category, SUM(S.total_amount) AS total_sales
+FROM Sales S
+JOIN Products P ON S.product_id = P.product_id
+GROUP BY P.category
+ORDER BY total_sales DESC;
+
+-----9. Customer Purchase Frequency:
+sql
+Copy code
+SELECT customer_id, COUNT(DISTINCT sale_id) AS purchase_frequency
+FROM Sales
+GROUP BY customer_id
+HAVING purchase_frequency > 1;
